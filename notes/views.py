@@ -19,7 +19,7 @@ class NoteAppDetails(APIView):
         try:
             notes = Note.objects.filter(user=request.data.get("user"))
             serializer = NotesSerializers(instance=notes, many=True)
-            return Response({'data': serializer.data}, status.HTTP_200_OK)
+            return Response({'data': serializer.data}, status=status.HTTP_200_OK)
         except ValidationError as e:
             logging.exception(e)
             return Response({'message': e.detail}, status=400)
