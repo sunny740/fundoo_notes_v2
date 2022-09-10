@@ -32,11 +32,11 @@ class Register(APIView):
             serializer.is_valid(raise_exception=True)
             serializer.save()
                 
-            return JsonResponse({"message": "User added", "data":serializer.data}, status=status.HTTP_201_CREATED)
+            return Response({"message": "User added", "data":serializer.data}, status=status.HTTP_201_CREATED)
             # return JsonResponse({"message": "Invalid Request"}, status = 400)
         except Exception as e:
             logger.exception(e)
-            return JsonResponse({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     
 class Login(APIView):
@@ -56,8 +56,4 @@ class Login(APIView):
                 status=status.HTTP_202_ACCEPTED)
         except Exception as e:
             logger.exception(e)
-            return Response({"message": str(e), "status": 400, "data": {}}, status=status.HTTP_400_BAD_REQUEST)
-
-
-    
-    
+            return Response({"message": str(e), "status": 400, "data": {}}, status=status.HTTP_400_BAD_REQUEST)  
