@@ -1,3 +1,4 @@
+from base64 import encode
 from datetime import date
 import json
 import logging
@@ -11,17 +12,25 @@ from .serializers import RegisterSerializer
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework import status
 from django.http import Http404
+from .models import User
+from django.core.mail import send_mail
+from django.conf import settings
+from rest_framework.serializers import ValidationError
+from .utils import JWTService
 
 
 logging.basicConfig(filename='fundoo_note.log', encoding='utf-8', level=logging.DEBUG,
                     format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 logger = logging.getLogger()
 
+
 class Register(APIView):
     """
     create a new class
     """
+    
     def post(self,request):
         """
         POST METHOD
@@ -31,9 +40,26 @@ class Register(APIView):
 
             serializer.is_valid(raise_exception=True)
             serializer.save()
+            username = serializer.data.get('username')
+            userid = serializer.data.get('id')
+            
+            Jwt_services = JWTService()
+            token = Jwt_services.encode_token({"user_id": userid, "username": username})
+            # token = JWTService.encode_token({"user_id": userid, "username": username})
+            print(token)
+
+            send_mail(from_email = settings.EMAIL_HOST_USER,
+                      recipient_list=[serializer.data['email']],
+                      message='Register first complete this process'
+                              f'url is http://127.0.0.1:8000/user/verify_token/{token}',
+                      subject='Registration link')
+
+            return Response({"message": "Email Verification"})
+        
+        except ValidationError as e:
+            logging.exception(e)
+            return Response({'message': 'Invalid Input'}, status=status.HTTP_400_BAD_REQUEST)         
                 
-            return Response({"message": "User added", "data":serializer.data}, status=status.HTTP_201_CREATED)
-            # return JsonResponse({"message": "Invalid Request"}, status = 400)
         except Exception as e:
             logger.exception(e)
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -46,14 +72,46 @@ class Login(APIView):
 
     def post(self, request):
         """
-        create new function
+        create post function
         """
         try:
             user = authenticate(**request.data)
             if not user:
                 raise Exception("Invalid Credentials")
-            return Response({"message": "Login Successful", "status": 202, "data": {}},
+            # userid = request.data.get("user_id")
+            # print(userid)
+            Jwt_services = JWTService()
+            token = Jwt_services.encode_token({"user_id": user.id, "username": user.username})
+
+            return Response({"message": "Login Successful", "status": 202, "data": token},
                 status=status.HTTP_202_ACCEPTED)
         except Exception as e:
             logger.exception(e)
             return Response({"message": str(e), "status": 400, "data": {}}, status=status.HTTP_400_BAD_REQUEST)  
+
+
+class VerifyToken(APIView):
+    """
+    create VerifyToken class
+    """
+
+    def get(self, request, token=None):
+        """
+        create get function
+        """
+        try:
+            Jwt_services = JWTService()
+            de_token = Jwt_services.decode_token(token)
+
+            user_id = de_token.get("user_id")
+            username = de_token.get("username")
+
+            user = User.objects.get(id=user_id, username=username)
+            # if user is not None:
+            user.is_verified = True
+            user.save()
+            return Response({"message": "Email is correct"})
+            # return Response({"message": "Invalid credentials"})
+        except Exception as e:
+            logging.exception(e)
+            return Response({"message": str(e)})
