@@ -46,7 +46,7 @@ class Register(APIView):
             Jwt_services = JWTService()
             token = Jwt_services.encode_token({"user_id": userid, "username": username})
             # token = JWTService.encode_token({"user_id": userid, "username": username})
-            print(token)
+            # print(token)
 
             send_mail(from_email = settings.EMAIL_HOST_USER,
                       recipient_list=[serializer.data['email']],
@@ -54,7 +54,7 @@ class Register(APIView):
                               f'url is http://127.0.0.1:8000/user/verify_token/{token}',
                       subject='Registration link')
 
-            return Response({"message": "Email Verification"})
+            return Response({"message": "Email Verification", "data": serializer.data}, status=201)
         
         except ValidationError as e:
             logging.exception(e)
