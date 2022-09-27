@@ -25,6 +25,7 @@ class TestNoteAppDetails:
         response = client.post(url, data,**header)
         assert response.status_code == 201
 
+
     # @pytest.mark.crud
     @pytest.mark.django_db
     def test_get_ope(self, client, django_user_model, db):
