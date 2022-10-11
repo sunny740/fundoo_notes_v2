@@ -144,3 +144,6 @@ EMAIL_HOST_USER = 'sunnysejwarvitm005@gmail.com'
 EMAIL_HOST_PASSWORD = 'afnjsniiqbbvguxh'
 EMAIL_USE_TLS = True
 
+# Celery settings
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"

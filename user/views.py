@@ -19,7 +19,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from rest_framework.serializers import ValidationError
 from .utils import JWTService
-
+from user.tasks import send_user_email_task
 
 logging.basicConfig(filename='fundoo_note.log', encoding='utf-8', level=logging.DEBUG,
                     format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
@@ -45,20 +45,20 @@ class Register(APIView):
             
             Jwt_services = JWTService()
             token = Jwt_services.encode_token({"user_id": userid, "username": username})
-            # token = JWTService.encode_token({"user_id": userid, "username": username})
+            send_user_email_task.delay(token, serializer.data.get('email'))
             # print(token)
 
-            send_mail(from_email = settings.EMAIL_HOST_USER,
-                      recipient_list=[serializer.data['email']],
-                      message='Register first complete this process'
-                              f'url is http://127.0.0.1:8000/user/verify_token/{token}',
-                      subject='Registration link')
+            # send_mail(from_email = settings.EMAIL_HOST_USER,
+            #           recipient_list=[serializer.data['email']], 
+            #           message='Register first complete this process'
+            #                   f'url is http://127.0.0.1:8000/user/verify_token/{token}',
+            #           subject='Registration link')
 
             return Response({"message": "Email Verification", "data": serializer.data}, status=201)
         
         except ValidationError as e:
             logging.exception(e)
-            return Response({'message': 'Invalid Input'}, status=status.HTTP_400_BAD_REQUEST)         
+            return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)         
                 
         except Exception as e:
             logger.exception(e)

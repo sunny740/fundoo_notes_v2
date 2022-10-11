@@ -37,11 +37,3 @@ class RedisServices:
             logging.exception(e)
             raise Exception("Data is unable in redis server")        
 
-
-
-# if __name__ == '__main__':
-#     value = RedisServices()
-#     print(value.get("name"))
-    # print(value.set(key = 'name', value = 'Abhinav'))        
-    
-    
