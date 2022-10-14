@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'user',
     'notes',
-    'rest_framework'
+    'rest_framework',
+    'drf_yasg'
 ]
 
 REST_FRAMEWORK = {
@@ -148,3 +149,14 @@ EMAIL_USE_TLS = True
 # Celery settings
 CELERY_BROKER_URL = "redis://localhost:6379"
 CELERY_RESULT_BACKEND = "redis://localhost:6379"
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Token',
+            'in': 'header'
+        }
+    }
+}

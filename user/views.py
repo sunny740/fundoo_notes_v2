@@ -4,6 +4,7 @@ import json
 import logging
 from urllib import response
 
+from drf_yasg import openapi
 from django.http import JsonResponse
 from user.models import User
 from django.shortcuts import render
@@ -20,6 +21,9 @@ from django.conf import settings
 from rest_framework.serializers import ValidationError
 from .utils import JWTService
 from user.tasks import send_user_email_task
+# from rest_framework.reverse import reverse
+
+from drf_yasg.utils import swagger_auto_schema
 
 logging.basicConfig(filename='fundoo_note.log', encoding='utf-8', level=logging.DEBUG,
                     format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
@@ -31,6 +35,18 @@ class Register(APIView):
     create a new class
     """
     
+    @swagger_auto_schema(
+        operation_summary="register",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING, description='username'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='password'),
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='email'),
+                'phone_number': openapi.Schema(type=openapi.TYPE_STRING, description='phone_number'),
+                'location': openapi.Schema(type=openapi.TYPE_STRING, description='location'),
+            }
+        ))
     def post(self,request):
         """
         POST METHOD
@@ -69,7 +85,15 @@ class Login(APIView):
     """
     Create new class 
     """
-
+    @swagger_auto_schema(
+        operation_summary="login user",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING, description='username'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='password'),
+            }
+        ))
     def post(self, request):
         """
         create post function
@@ -88,6 +112,8 @@ class Login(APIView):
         except Exception as e:
             logger.exception(e)
             return Response({"message": str(e), "status": 400, "data": {}}, status=status.HTTP_400_BAD_REQUEST)  
+
+
 
 
 class VerifyToken(APIView):

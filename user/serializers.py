@@ -2,7 +2,7 @@ import logging
 from asyncio.log import logger
 from rest_framework import serializers
 from .models import User
-
+from django.contrib.auth import authenticate
 
 logging.basicConfig(filename='fundoo_note.log', encoding='utf-8', level=logging.DEBUG,
                     format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
@@ -27,3 +27,4 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'password', 'email', 'first_name', 'last_name', 'phone_number', 'location', 'is_verified']
+

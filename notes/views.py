@@ -16,6 +16,9 @@ from user.utils import JWTService
 
 from notes.redis_crud import RedisNote
 
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
 log = '%(lineno)d ** %(asctime)s ** %(message)s'
 logging.basicConfig(filename='note.log', filemode='a', format=log, level=logging.DEBUG)
 
@@ -24,7 +27,18 @@ class NoteAppDetails(APIView):
     """
     create NoteAppdetails class
     """
-    
+
+    @swagger_auto_schema(
+        operation_summary="Add note",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': openapi.Schema(type=openapi.TYPE_STRING, description="id"),
+                'title': openapi.Schema(type=openapi.TYPE_STRING, description="title"),
+                'description': openapi.Schema(type=openapi.TYPE_STRING, description="description"),
+            }
+        ),
+    )
     @verify_token
     def post(self, request):
         try:
@@ -44,6 +58,9 @@ class NoteAppDetails(APIView):
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+    @swagger_auto_schema(
+        operation_summary="get",
+    )
     @verify_token
     def get(self, request):
         try:
@@ -66,7 +83,18 @@ class NoteAppDetails(APIView):
             logging.exception(e)
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-            
+
+    @swagger_auto_schema(
+        operation_summary="update note",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description="id"),
+                'title': openapi.Schema(type=openapi.TYPE_STRING, description="title"),
+                'description': openapi.Schema(type=openapi.TYPE_STRING, description="description"),
+            }
+        ),
+    )            
     @verify_token
     def put(self, request):
         try:
@@ -86,6 +114,15 @@ class NoteAppDetails(APIView):
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+    @swagger_auto_schema(
+        operation_summary="Delete",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description="note id"),
+            }
+        ),
+    )
     @verify_token
     def delete(self, request):
         try:
